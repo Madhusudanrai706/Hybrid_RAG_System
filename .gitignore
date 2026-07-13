@@ -6,7 +6,8 @@ __pycache__/
 *.py[cod]
 
 # Chroma Database
-chroma_db/
+faiss_index/
+bm25_index/
 
 # Environment Variables
 .env

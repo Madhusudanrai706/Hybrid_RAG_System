@@ -1,33 +1,30 @@
+# Web UI
 streamlit
 python-dotenv
 
+# LangChain
 langchain
 langchain-core
 langchain-community
 langchain-groq
 langchain-huggingface
 
-chromadb==0.5.23
+# Vector Database
+faiss-cpu
 
+# Embedding Models
 sentence-transformers
-transformers
-tokenizers==0.20.3
-huggingface-hub>=0.33.4
-
 torch
-torchvision
-torchaudio
 
+# PDF Processing
 pypdf
 
+# Keyword Search
 rank-bm25
 
+# Numerical
 numpy
-pandas
 
-scikit-learn
-
+# Evaluation Metrics
 nltk
 rouge-score
-
-tqdm
