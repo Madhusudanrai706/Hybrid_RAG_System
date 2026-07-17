@@ -18,7 +18,7 @@ EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 # LLM (Groq)
 # ---------------------------------------------------
 LLM_MODEL_NAME = "llama-3.3-70b-versatile"
-LLM_TEMPERATURE = 0
+LLM_TEMPERATURE = 0.2
 
 # ---------------------------------------------------
 # Retrieval
@@ -33,3 +33,6 @@ KEYWORD_WEIGHT = 0.3
 PDF_DIR = "pdfs"
 FAISS_INDEX_DIR = "faiss_index"
 BM25_INDEX_PATH = "bm25_index/bm25.pkl"
+
+# PDF Parser
+PARSER_MODE = "hybrid"

@@ -19,6 +19,14 @@ torch
 # PDF Processing
 pypdf
 
+# Optional Advanced Parsers
+docling
+llama-parse
+langchain-core
+
+# Docling's layout model needs RT-DETRv2 support (added in Transformers 4.55)
+transformers>=4.55
+
 # Keyword Search
 rank-bm25
 

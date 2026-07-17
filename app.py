@@ -44,24 +44,41 @@ if uploaded_files and st.button("Process PDFs"):
 
     with st.spinner("Processing PDFs..."):
         all_chunks = []
+        failed_files = []
 
         for uploaded_file in uploaded_files:
             pdf_path = os.path.join(PDF_DIR, uploaded_file.name)
             with open(pdf_path, "wb") as f:
                 f.write(uploaded_file.getbuffer())
 
-            chunks = split_documents(load_pdf(pdf_path))
+            try:
+                chunks = split_documents(load_pdf(pdf_path))
+            except Exception as e:
+                failed_files.append((uploaded_file.name, str(e)))
+                continue
+
+            if not chunks:
+                failed_files.append((uploaded_file.name, "No text could be extracted."))
+                continue
+
             for chunk in chunks:
                 chunk.metadata["source"] = uploaded_file.name
 
             all_chunks.extend(chunks)
+
+        for name, err in failed_files:
+            st.error(f"❌ {name}: {err}")
+
+        if not all_chunks:
+            st.warning("No chunks were extracted from any file. Nothing to index.")
+            st.stop()
 
         st.session_state.vector_db = create_vector_store(all_chunks)
         st.session_state.bm25 = create_keyword_store(all_chunks)
         st.session_state.chunks = all_chunks
         st.session_state.processed = True
 
-    st.success(f"✅ Processed {len(all_chunks)} chunks from {len(uploaded_files)} file(s)!")
+    st.success(f"✅ Processed {len(all_chunks)} chunks from {len(uploaded_files) - len(failed_files)} file(s)!")
 
 
 # ---------------------------------------------------
