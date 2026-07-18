@@ -1,5 +1,5 @@
 """
-Keyword (BM25) store — persists the sparse index to disk, the same way
+Keyword (BM25) store - persists the sparse index to disk, the same way
 vector_store.py persists the FAISS index, instead of keeping it only as
 a raw Python list in Streamlit's session state.
 
@@ -32,4 +32,34 @@ def load_keyword_store():
     with open(BM25_INDEX_PATH, "rb") as f:
         data = pickle.load(f)
 
-    return data["bm25"], data["chunks"]  
+    return data["bm25"], data["chunks"]
+
+
+def add_to_keyword_store(new_chunks):
+    """
+    Add new chunks to the keyword index.
+
+    Unlike FAISS, BM25 has no notion of "adding a vector" - the index is
+    just term statistics computed over the whole corpus at once, so there
+    is no incremental update. Instead: load whatever chunks were already
+    indexed (if any), append the new ones, rebuild BM25 over the combined
+    corpus, and save.
+
+    This is still cheap - BM25Okapi's build is just tokenizing text and
+    counting terms, no embedding model or network calls involved, so it's
+    fast even for a few thousand chunks.
+    """
+    if keyword_store_exists():
+        _, existing_chunks = load_keyword_store()
+    else:
+        existing_chunks = []
+
+    combined_chunks = existing_chunks + new_chunks
+    bm25 = create_keyword_store(combined_chunks)
+
+    return bm25, combined_chunks
+
+
+def keyword_store_exists():
+    """True if a BM25 index has already been saved to disk."""
+    return os.path.exists(BM25_INDEX_PATH)

@@ -17,6 +17,10 @@ PROMPT_TEMPLATE = """You are an intelligent AI assistant.
 
 Answer ONLY from the provided context.
 
+Each context block below is labeled with its source file, page, and
+chapter. When you use information from a block, mention which source
+and page it came from.
+
 If the answer is not available in the context, reply exactly:
 "I couldn't find this information in the uploaded PDFs."
 
@@ -44,7 +48,26 @@ def get_llm():
 
 
 def build_context(top_docs):
-    return "\n\n".join(doc.page_content for doc in top_docs)
+    """
+    Join the top retrieved chunks into one context string for the LLM.
+
+    Each chunk is prefixed with a metadata header (source/page/chapter)
+    so the LLM can cite where an answer came from - this matters more
+    now that results can be metadata-filtered, so the person asking can
+    see which specific PDF/page/chapter the answer is grounded in.
+    """
+    parts = []
+
+    for doc in top_docs:
+        meta = doc.metadata
+        header = (
+            f"[Source: {meta.get('source', 'Unknown')} | "
+            f"Page: {meta.get('page', '-')} | "
+            f"Chapter: {meta.get('chapter', 'Unknown')}]"
+        )
+        parts.append(f"{header}\n{doc.page_content}")
+
+    return "\n\n".join(parts)
 
 
 def generate_answer(llm, context, question):

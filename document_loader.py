@@ -16,6 +16,33 @@ downstream (vector_store.py, keyword_store.py) works unchanged.
 """
 
 from langchain_core.documents import Document
+import re
+
+# Matches headings like "Chapter 3: Thermodynamics" or "Unit 5 - Waves"
+# near the start of a chunk. This is a heuristic, not a guarantee - PDFs
+# don't have a standard machine-readable "chapter" field, so this is the
+# best-effort way to recover it from the text itself.
+_CHAPTER_PATTERN = re.compile(
+    r"(chapter\s+\d+[:.\-]?\s*[A-Za-z0-9 ,&'\-]{0,60}"
+    r"|unit\s+\d+[:.\-]?\s*[A-Za-z0-9 ,&'\-]{0,60})",
+    re.IGNORECASE
+)
+
+
+def detect_chapter(text):
+    """
+    Best-effort chapter/unit heading detection from a chunk's text.
+    Returns "Unknown" if no heading-like pattern is found in the first
+    ~300 characters (where a heading would typically appear).
+    """
+    if not text:
+        return "Unknown"
+
+    match = _CHAPTER_PATTERN.search(text[:300])
+    if match:
+        return match.group(0).strip().title()
+
+    return "Unknown"
 
 
 def load_pdf_docling(pdf_path):
